@@ -19,14 +19,11 @@ class OBDParser
 public:
     ~OBDParser();
     static OBDParser create();
+    int64_t load(std::filesystem::path filePath);
     OBDRecord getRecord(int64_t pos);
 
 private:
     OBDParser();
-    void initialize();
-    int64_t load();
 
     std::vector<OBDRecord> m_records;
-    uint8_t m_fieldBackPos;
-    std::filesystem::path m_filePath = "../data/dataset.csv";
 };

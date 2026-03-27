@@ -16,44 +16,18 @@ OBDParser OBDParser::create()
 {
     OBDParser obdParser;
 
-    obdParser.initialize();
-
     return obdParser;
 }
 
-OBDRecord OBDParser::getRecord(int64_t pos)
+int64_t OBDParser::load(std::filesystem::path filePath)
 {
-    OBDRecord record;
-
-    try {
-        record = m_records.at(pos);
-    } catch(const std::out_of_range& e) {
-        std::cerr << "[ERROR] " << e.what() << std::endl;
-    }
-
-    return record;
-}
-
-void OBDParser::initialize()
-{
-    m_fieldBackPos = (sizeof(OBDRecord) / sizeof(double)) - 1;
-
-    int64_t recordsLoaded = load();
-
-    if (recordsLoaded != - 1)
-        std::cout << "[INFO] " << "Загружено записей: " << recordsLoaded << std::endl;
-}
-
-int64_t OBDParser::load()
-{
-    std::ifstream dataset(m_filePath);
     std::string row;
+    std::ifstream dataset(filePath);
+    size_t sizeStart = m_records.size();
+    uint8_t fieldBackPos = (sizeof(OBDRecord) / sizeof(double)) - 1;
 
-    if (!dataset.is_open()) {
-        std::cerr << "[ERROR] " << m_filePath << std::endl;
-
+    if (!dataset.is_open())
         return -1;
-    }
 
     getline(dataset, row);
 
@@ -63,14 +37,17 @@ int64_t OBDParser::load()
         OBDRecord record;
         bool recordError = false;
         
-        if (row.front() == ',' || row.empty()) {
+        if (row.empty())
+            continue;
+
+        if (row.front() == ',') {
             std::cerr << "[ERROR] " << row << std::endl;
 
             continue;
         }
 
         double *pFieldFront = reinterpret_cast<double *>(&record);
-        double *pFieldBack = pFieldFront + m_fieldBackPos;
+        double *pFieldBack = pFieldFront + fieldBackPos;
         double fieldFront = std::stod(row.substr(0, row.find(',')));
         memcpy(pFieldFront, &fieldFront, sizeof(double));
 
@@ -96,6 +73,19 @@ int64_t OBDParser::load()
     }
 
     dataset.close();
+    
+    return m_records.size() - sizeStart;
+}
 
-    return m_records.size();
+OBDRecord OBDParser::getRecord(int64_t pos)
+{
+    if (pos >= m_records.size()) {
+        std::out_of_range error("[ERROR] Неверный индекс");
+
+        throw error;
+    } else {
+        OBDRecord record = m_records[pos];
+
+        return record;
+    }
 }
