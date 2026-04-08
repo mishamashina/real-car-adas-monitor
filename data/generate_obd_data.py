@@ -1,18 +1,22 @@
 import csv
 
 class Headers:
-    rpm = "RPM"
     speed = "SPEED"
+    rpm = "RPM"
     throttlePos = "THROTTLE_POS"
     coolantTemp = "COOLANT_TEMP"
     fuelLevel = "FUEL_LEVEL"
+    intakeTemp = "INTAKE_TEMP"
+    label = "LABEL"
 
 class Fields:
-    rpm = list()
     speed = list()
+    rpm = list()
     throttlePos = list()
     coolantTemp = list()
     fuelLevel = list()
+    intakeTemp = list()
+    label = list()
 
 headers = Headers()
 fields = Fields()
@@ -32,12 +36,22 @@ with open("dataset_origin.csv", newline='') as datasetOrigin:
             continue
             
         if rowAppendedCount < rowAppendCount:
-            fields.rpm.append(row[headers.rpm])
             fields.speed.append(row[headers.speed])
+            fields.rpm.append(row[headers.rpm])
             fields.throttlePos.append(row[headers.throttlePos])
             fields.coolantTemp.append(row[headers.coolantTemp])
             fields.fuelLevel.append(row[headers.fuelLevel])
+            fields.intakeTemp.append(row[headers.intakeTemp])
+
+            acceleratorPos = float(row["ACCELERATOR_POS_D"])
             
+            if acceleratorPos < 25:
+                fields.label.append("SLOW")
+            elif acceleratorPos < 50:
+                fields.label.append("NORMAL")
+            else:
+                fields.label.append("AGGRESSIVE")
+
             rowAppendedCount += 1
         else:
             break
@@ -46,11 +60,13 @@ with open("dataset_origin.csv", newline='') as datasetOrigin:
 
 with open("dataset.csv", "w", newline='') as dataset:
     fieldNames = [
-        headers.rpm,
         headers.speed,
+        headers.rpm,
         headers.throttlePos,
         headers.coolantTemp,
-        headers.fuelLevel
+        headers.fuelLevel,
+        headers.intakeTemp,
+        headers.label
     ]
 
     writer = csv.DictWriter(dataset, fieldNames, lineterminator="\n")
@@ -58,11 +74,13 @@ with open("dataset.csv", "w", newline='') as dataset:
     
     for i in range(0, rowAppendCount):
         writer.writerow({
-            headers.rpm: fields.rpm[i],
             headers.speed: fields.speed[i],
+            headers.rpm: fields.rpm[i],
             headers.throttlePos: fields.throttlePos[i],
             headers.coolantTemp: fields.coolantTemp[i],
             headers.fuelLevel: fields.fuelLevel[i],
+            headers.intakeTemp: fields.intakeTemp[i],
+            headers.label: fields.label[i],
         })
 
     dataset.close()

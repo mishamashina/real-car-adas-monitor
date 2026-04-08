@@ -17,7 +17,16 @@ int main()
         OBDRecord record = parser.getRecord(i);
 
         std::cout << "[INFO] " << "Запись № " << i << std::endl;
-        printf("%f %f %f %f %f \n", record.rpm, record.speed, record.throttlePos, record.coolantTemp, record.fuelLevel);
+        printf(
+            "%f %f %f %f %f %f %f \n", 
+            record.speed, 
+            record.rpm, 
+            record.throttlePos, 
+            record.coolantTemp, 
+            record.fuelLevel,
+            record.intakeTemp,
+            record.label
+        );
     }
 
     return 0;

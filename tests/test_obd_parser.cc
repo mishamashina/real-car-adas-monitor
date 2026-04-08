@@ -3,6 +3,13 @@
 #include "../src/obd_parser.hpp"
 
 OBDParser parser = OBDParser::create();
+std::map<std::string, double> mapLabel = parser.getMapLabel();
+
+TEST(OBDParserTest, labelConversion) {
+    ASSERT_EQ(mapLabel["SLOW"], 0);
+    ASSERT_EQ(mapLabel["NORMAL"], 1);
+    ASSERT_EQ(mapLabel["AGGRESSIVE"], 2);
+}
 
 TEST(OBDParserTest, loadError) {
     ASSERT_EQ(parser.load("wrong_file_path.csv"), -1);
@@ -13,9 +20,9 @@ TEST(OBDParserTest, getIndexError) {
 }
 
 TEST(OBDParserTest, loadCorrect) {
-    ASSERT_EQ(parser.load("../data/dataset_good.csv"), 500);
+    ASSERT_EQ(parser.load("../data/dataset_good.csv"), 1000);
 }
 
 TEST(OBDParserTest, loadIncorrect) {
-    ASSERT_NE(parser.load("../data/dataset_bad.csv"), 5000);
+    ASSERT_NE(parser.load("../data/dataset.csv"), 5000);
 }

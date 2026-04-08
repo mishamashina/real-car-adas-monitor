@@ -16,7 +16,16 @@ OBDParser OBDParser::create()
 {
     OBDParser obdParser;
 
+    obdParser.initialize();
+
     return obdParser;
+}
+
+void OBDParser::initialize()
+{
+    m_mapLabel["SLOW"] = 0;
+    m_mapLabel["NORMAL"] = 1;
+    m_mapLabel["AGGRESSIVE"] = 2;
 }
 
 int64_t OBDParser::load(std::filesystem::path filePath)
@@ -36,6 +45,7 @@ int64_t OBDParser::load(std::filesystem::path filePath)
 
         OBDRecord record;
         bool recordError = false;
+        std::string rowCopy = row;
         
         if (row.empty())
             continue;
@@ -56,12 +66,18 @@ int64_t OBDParser::load(std::filesystem::path filePath)
             std::string str = row.substr(pos + 1);
 
             if (!str.empty()) {
-                double field = std::stod(str);
+                double field;
+
+                if (pField == pFieldBack)
+                    field = m_mapLabel[str];
+                else
+                    field = std::stod(str);
+
                 memcpy(pField, &field, sizeof(double));
                 
                 row.erase(pos);
             } else {
-                std::cerr << "[ERROR] " << row << std::endl;
+                std::cerr << "[ERROR] " << rowCopy << std::endl;
 
                 recordError = true;
                 break;
@@ -88,4 +104,9 @@ OBDRecord OBDParser::getRecord(int64_t pos)
 
         return record;
     }
+}
+
+std::map<std::string, double> OBDParser::getMapLabel()
+{
+    return m_mapLabel;
 }
