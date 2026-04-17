@@ -46,11 +46,11 @@ with open("dataset_origin.csv", newline='') as datasetOrigin:
             acceleratorPos = float(row["ACCELERATOR_POS_D"])
             
             if acceleratorPos < 25:
-                fields.label.append("SLOW")
+                fields.label.append("GENTLE")
             elif acceleratorPos < 50:
                 fields.label.append("NORMAL")
             else:
-                fields.label.append("AGGRESSIVE")
+                fields.label.append("VIOLENT")
 
             rowAppendedCount += 1
         else:
@@ -58,7 +58,7 @@ with open("dataset_origin.csv", newline='') as datasetOrigin:
     
     datasetOrigin.close()
 
-with open("dataset.csv", "w", newline='') as dataset:
+with open("obd_data.csv", "w", newline='') as dataset:
     fieldNames = [
         headers.speed,
         headers.rpm,
