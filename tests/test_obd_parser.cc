@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
-
 #include "../src/obd_parser.hpp"
 
+#include <gtest/gtest.h>
+
 OBDParser parser = OBDParser::create();
-std::map<std::string, double> mapLabel = parser.getMapLabel();
+std::map<std::string, float> mapLabel = parser.getMapLabel();
 
 TEST(OBDParserTest, labelConversion) {
     ASSERT_EQ(mapLabel["SLOW"], 0);

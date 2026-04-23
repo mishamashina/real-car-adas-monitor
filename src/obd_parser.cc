@@ -33,7 +33,7 @@ int64_t OBDParser::load(std::filesystem::path filePath)
     std::string row;
     std::ifstream dataset(filePath);
     size_t sizeStart = m_records.size();
-    uint8_t fieldBackPos = (sizeof(OBDRecord) / sizeof(double)) - 1;
+    uint8_t fieldBackPos = (sizeof(OBDRecord) / sizeof(float)) - 1;
 
     if (!dataset.is_open())
         return -1;
@@ -46,6 +46,8 @@ int64_t OBDParser::load(std::filesystem::path filePath)
         OBDRecord record;
         bool recordError = false;
         std::string rowCopy = row;
+
+        memset(&record, 0, sizeof(record));
         
         if (row.empty())
             continue;
@@ -56,24 +58,24 @@ int64_t OBDParser::load(std::filesystem::path filePath)
             continue;
         }
 
-        double *pFieldFront = reinterpret_cast<double *>(&record);
-        double *pFieldBack = pFieldFront + fieldBackPos;
-        double fieldFront = std::stod(row.substr(0, row.find(',')));
-        memcpy(pFieldFront, &fieldFront, sizeof(double));
+        float *pFieldFront = reinterpret_cast<float *>(&record);
+        float *pFieldBack = pFieldFront + fieldBackPos;
+        float fieldFront = std::stod(row.substr(0, row.find(',')));
+        memcpy(pFieldFront, &fieldFront, sizeof(float));
 
-        for (double *pField = pFieldBack; pField != pFieldFront; pField--) {
+        for (float *pField = pFieldBack; pField != pFieldFront; pField--) {
             size_t pos = row.find_last_of(',');
             std::string str = row.substr(pos + 1);
 
             if (!str.empty()) {
-                double field;
+                float field;
 
                 if (pField == pFieldBack)
                     field = m_mapLabel[str];
                 else
                     field = std::stod(str);
 
-                memcpy(pField, &field, sizeof(double));
+                memcpy(pField, &field, sizeof(float));
                 
                 row.erase(pos);
             } else {
@@ -106,7 +108,7 @@ OBDRecord OBDParser::getRecord(int64_t pos)
     }
 }
 
-std::map<std::string, double> OBDParser::getMapLabel()
+std::map<std::string, float> OBDParser::getMapLabel()
 {
     return m_mapLabel;
 }
